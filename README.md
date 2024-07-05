@@ -1,2 +1,2 @@
 Get list of contests from:
-> GFG
+> GFG using Selenium
