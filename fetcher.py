@@ -7,17 +7,21 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.remote_connection import LOGGER as seleniumLogger
 from webdriver_manager.chrome import ChromeDriverManager
+from pickle import dump
 
-seleniumLogger.setLevel(logging.INFO)
+gfg_url = "https://www.geeksforgeeks.org/events?itm_source=geeksforgeeks&itm_medium=main_header&itm_campaign=contests"
 
-chrome_options = Options()
-chrome_options.add_argument("--headless=new")
+def setup_selenium():
+    seleniumLogger.setLevel(logging.INFO)
 
-driver = webdriver.Chrome(
-    service=ChromeService(ChromeDriverManager().install()),
-    options=chrome_options
-    )
-
+    chrome_options = Options()
+    chrome_options.add_argument("--headless=new")
+    
+    global driver
+    driver = webdriver.Chrome(
+        service=ChromeService(ChromeDriverManager().install()),
+        options=chrome_options
+        )
 
 logging.basicConfig(filename="log.log",
                     format='%(levelname)s - %(asctime)s - %(message)s',
@@ -45,18 +49,18 @@ def get_URL(URL):
         try:
             return requests.get(URL)
         except:
-            logger.debug("Site may be down / URL is wrong")
+            logger.debug("Site may be down / URL is wrong / Net is slow")
             return False
 
-def check_element(url):
+def check_element(url,wait_time):
     driver.get(url)
-    delay = 5
+    delay = wait_time
     txt = str(driver.page_source)
     element_name = ""    
     try:
         x = txt.find("eventsLanding_eachEventContainer")
         if(x==-1):
-                raise Exception("Element could not be loaded. Perhaps the name/container has changed")
+                raise Exception("Element could not be loaded. Perhaps the name/container has changed or Net is slow")
         
         while(txt[x]!='"'):
             element_name+=txt[x]
@@ -80,7 +84,7 @@ def create_list(contests):
     return data
 
 def scrape_gfg(url):
-    element_name = check_element(url)
+    element_name = check_element(url,10)
     if(element_name == False):
         print("Check the log.log file")
         return
@@ -101,18 +105,19 @@ def print_contests(List):
         print(f"Name : {contest.name}")
         print(f"Date : {contest.date}")
         print(f"Time : {contest.time}")
-        print()
-    
+        print()   
 
-gfg_url = "https://www.geeksforgeeks.org/events?itm_source=geeksforgeeks&itm_medium=main_header&itm_campaign=contests"
+def fetch():
+    setup_selenium()
+    all_contests = []
+    gfg = get_URL(gfg_url)
+    if(gfg != False):
+        gfg_contests = scrape_gfg(gfg_url)
+        add_contests(gfg_contests,all_contests)
+    else:
+        logger.log("Error Occured")
 
-all_contests = []
-gfg = get_URL(gfg_url)
-if(gfg != False):
-    gfg_contests = scrape_gfg(gfg_url)
-    add_contests(gfg_contests,all_contests)
-else:
-    logger.log("Error Occured")
+    with open("data.pkl",'wb') as f:
+        dump(all_contests,f)
 
-print_contests(all_contests)
 print("---------------PROGRAM ENDED--------------")
