@@ -8,6 +8,10 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.remote_connection import LOGGER as seleniumLogger
 from webdriver_manager.chrome import ChromeDriverManager
 from pickle import dump
+from os import makedirs, path, getcwd
+
+temp_dir = path.join(getcwd(),"source\\temp")
+makedirs(temp_dir, exist_ok=True)
 
 gfg_url = "https://www.geeksforgeeks.org/events?itm_source=geeksforgeeks&itm_medium=main_header&itm_campaign=contests"
 
@@ -23,7 +27,7 @@ def setup_selenium():
         options=chrome_options
         )
 
-logging.basicConfig(filename="log.log",
+logging.basicConfig(filename="./source/temp/log.log",
                     format='%(levelname)s - %(asctime)s - %(message)s',
                     filemode='w')
 logger = logging.getLogger()
@@ -78,8 +82,15 @@ def check_element(url,wait_time):
 def create_list(contests):
     data = []
     for elements in contests:
-        lst = elements.split('\n')        
-        data.append(ContestInfo(lst[2],lst[0],lst[1]))
+        lst = elements.split('\n')
+        if len(lst)==4:
+            data.append(ContestInfo(name=lst[3],
+                                    date=lst[1],
+                                    time=lst[2]))
+        else:
+            data.append(ContestInfo(name=lst[2],
+                                    date=lst[0],
+                                    time=lst[1]))
     
     return data
 
@@ -117,7 +128,9 @@ def fetch():
     else:
         logger.log("Error Occured")
 
-    with open("data.pkl",'wb') as f:
+    with open("./source/temp/data.pkl",'wb') as f:
         dump(all_contests,f)
 
-print("---------------PROGRAM ENDED--------------")
+if __name__ == '__main__':
+    fetch()
+    print("---------------PROGRAM ENDED--------------")

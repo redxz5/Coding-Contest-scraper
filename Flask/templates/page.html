@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block content %}
+
+{% if all_contests %}
+    {% for contest in all_contests %}
+        <hr>
+        <h2>{{contest.name}}</h2>
+        <h2>{{contest.time}} on {{contest.date}}</h2>
+    {% endfor %}
+    <hr>
+{% else %}
+    Click <i>Get Contests</i>
+{% endif %}
+
+{% endblock content %}

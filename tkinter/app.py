@@ -3,12 +3,16 @@ from tkinter import ttk
 from subprocess import call
 from pickle import load
 import tkinter.scrolledtext as scrolledtext
-import fetcher
+from os import getcwd,path
+import sys
+src_path = path.join(getcwd(),"source")
+sys.path.append(src_path)
+import fetcher as F
 
 def get_fetched_data():
     text.delete(1.0,END)
-    fetcher.fetch()
-    with open("data.pkl","rb") as f:
+    F.fetch()
+    with open("./source/temp/data.pkl","rb") as f:
         all_contests = load(f)
 
     _text = ""

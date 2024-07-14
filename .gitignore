@@ -1,2 +1,4 @@
-log.log
-__pycache__/
+source/temp/log.log
+source/temp/data.pkl
+source/temp/check.py
+source/__pycache__
